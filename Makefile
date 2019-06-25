@@ -2,7 +2,6 @@ open_db_container:
 	@echo '-------------------------------'
 	@echo 'Opening postgres container ...'
 	@echo '-------------------------------'
-	@echo 'psql -U akshays94 -d ndaysofdb'
 	docker container exec -it ndaysof-server_mydb_1 bash
 
 up:

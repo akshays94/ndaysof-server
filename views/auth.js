@@ -75,8 +75,6 @@ module.exports = {
 
     const { email, password } = request.body;
 
-    console.log(email, password)
-
     const getUserQuery = {
       text: `SELECT id, firstname, lastname, email, password
           FROM users
@@ -138,6 +136,7 @@ module.exports = {
                             token,
                             loginLogId: results.rows[0].id,
                             user: {
+                              id: user.id,
                               email: user.email,
                               name: `${user.firstname} ${user.lastname}`,
                               firstname: user.firstname
