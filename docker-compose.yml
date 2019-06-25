@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+    myweb:
+        image: node:11
+        volumes:
+            - .:/usr/src/app
+            - /usr/src/app/node_modules
+        working_dir: /usr/src/app
+        env_file:
+            - ./Docker/web.env
+        ports:
+            - 3000:3000
+        depends_on:
+            - mydb   
+        command: npm run dev  
+
+
+    mydb:
+        image: postgres:11
+        volumes:
+            - postgres_data_dev:/var/lib/postgresql/data
+        env_file:
+            - ./Docker/db.env
+volumes:
+    postgres_data_dev:       
