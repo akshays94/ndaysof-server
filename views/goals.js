@@ -12,7 +12,27 @@ const verifyToken = require('../verify-token')
 
 module.exports = {
 
-  goals (request, response) {},
+  goals (request, response) {
+
+    jwt.verify(request.token, JWTSECRETKEY, (err, authData) => {
+      
+      if (err) return response.status(401).json({ message: 'Token seems to be invalid' })
+
+      const userId = authData.user.id;
+
+      const getGoalsQuery = {
+        text: `SELECT * FROM goal WHERE created_by=$1`,
+        values: [userId] 
+      }
+    
+      pool
+        .query(getGoalsQuery)
+        .then(results => response.json(results.rows))
+        .catch(err => response.status(500).json({ message: `Error isGoalAlreadyExistsQuery: ${err}` }))
+          
+    })
+
+  },
 
   addGoal (request, response) {
 
