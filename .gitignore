@@ -87,6 +87,6 @@ typings/
 # DynamoDB Local files
 .dynamodb/
 
-db.txt
+dbqueries.txt
 
 Docker

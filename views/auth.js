@@ -5,8 +5,10 @@ const { check, validationResult } = require('express-validator');
 
 const pool = require('../db-config.js');
 
-const SALT_ROUNDS = 10;
+const SALT_ROUNDS = process.env.SALTROUNDS;
 const JWTSECRETKEY = process.env.JWTSECRETKEY;
+
+const verifyToken = require('../verify-token')
 
 module.exports = {
 
@@ -159,5 +161,71 @@ module.exports = {
       .catch(err => response.status(500).json({ message: `Error getUserQuery: ${err}` }))
 
   },
+
+  logout: (request, response) => {
+
+    const errors = validationResult(request);
+    if (!errors.isEmpty())
+      return response.status(400).json({ errors: errors.array()});
+
+    jwt.verify(request.token, JWTSECRETKEY, (err, authData) => {
+      if (err) 
+        return response
+                .status(401)
+                .json({
+                  message: 'Token seems to be invalid', 
+                  err 
+                });
+
+      const { loginLogId } = request.body;
+
+      const hasLoginRecordQuery = {
+        text: `SELECT EXISTS
+            (SELECT * FROM user_login_log
+            WHERE id=$1 AND is_active=true)`,
+        values: [loginLogId]
+      }
+
+      const markLoggedOutQuery = {
+        text: `UPDATE user_login_log
+          SET logged_out_on = current_timestamp, is_active = false
+          WHERE id = $1`,
+        values: [loginLogId]  
+      }
+
+      pool
+        .query(hasLoginRecordQuery)
+        .then(results => {
+
+          const hasLoginRecord = results.rows[0]['exists'];
+
+          if (!hasLoginRecord) {
+            return response.status(404).json({ message: 'Unable to log out since no login record found' })
+          } else {
+            return pool.query(markLoggedOutQuery)
+          }
+
+        })  
+        .catch(err => response.status(500).json({ message: `Error hasLoginRecordQuery: ${err}` }))
+
+        .then(results => {
+
+          const isUpdated = results.rowCount > 0;
+
+          if (isUpdated) { 
+            return response
+              .json({
+                message: 'Logout Successful'
+              })
+            
+          } else {
+            return response.status(500).response({ message: 'Unable to logout' })
+          }
+        })
+        .catch(err => response.status(500).json({ message: `Error markLoggedOutQuery: ${err}` }))
+    });
+
+
+  }
 
 }

@@ -21,7 +21,11 @@ app.get('/', (request, response) => {
 })
 
 const authRoutes = require('./routes/auth')
+const goalRoutes = require('./routes/goals')
+
 app.use('/auth', authRoutes)
+app.use('/goals', goalRoutes)
+
 
 app.listen(3000, () => {
 	console.log('Server running!')
