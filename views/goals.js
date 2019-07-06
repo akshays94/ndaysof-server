@@ -44,12 +44,16 @@ module.exports = {
       
       if (err) return response.status(401).json({ message: 'Token seems to be invalid' })
 
-      let { title, days, userId, startDate } = request.body;
-  
-      startDate = moment(startDate, "MM-DD-YYYY", true);
-      if (!startDate.isValid()) {
-        return response.status(422).json({ message: 'Invalid start date format' });
-      }
+      // let { title, days, userId, startDate } = request.body;
+      let { title, days } = request.body;
+
+      // let startDate = moment(startDate, "MM-DD-YYYY", true);
+      // if (!startDate.isValid()) {
+      //   return response.status(422).json({ message: 'Invalid start date format' });
+      // }
+
+      let userId = authData.user.id;
+      let startDate = new Date();
 
       const isGoalAlreadyExistsQuery = {
         text: `SELECT EXISTS
@@ -60,7 +64,8 @@ module.exports = {
       const createNewGoalQuery = {
         text: `INSERT INTO goal
             (title, days, created_by, start_date)
-            VALUES ($1, $2, $3, $4)`,
+            VALUES ($1, $2, $3, $4) 
+            RETURNING id, title, days, start_date`,
         values: [title, days, userId, startDate]
       }
   
@@ -76,7 +81,7 @@ module.exports = {
         })
         .catch(err => response.status(500).json({ message: `Error isGoalAlreadyExistsQuery: ${err}` }))
   
-        .then(results => response.status(201).json({ message: `Goal created` }))
+        .then(results => response.status(201).json({ message: `Goal created`, goal: results.rows[0] }))
         .catch(err => response.status(500).json({ message: `Error createNewGoalQuery: ${err}` }))
         
     })    

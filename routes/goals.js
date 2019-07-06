@@ -11,8 +11,8 @@ router.get('/', verifyToken, views.goals);
 router.post('/',[
     check('title').exists(),
     check('days').exists().isNumeric(),
-    check('userId').exists().isNumeric(),
-    check('startDate').exists(),
+    // check('userId').exists().isNumeric(),
+    // check('startDate').exists(),
   ], verifyToken, views.addGoal);
 
 router.patch('/:goalId', verifyToken, views.updateGoal);

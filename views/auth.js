@@ -5,7 +5,7 @@ const { check, validationResult } = require('express-validator');
 
 const pool = require('../db-config.js');
 
-const SALT_ROUNDS = process.env.SALTROUNDS;
+const SALT_ROUNDS = parseInt(process.env.SALTROUNDS);
 const JWTSECRETKEY = process.env.JWTSECRETKEY;
 
 const verifyToken = require('../verify-token')
