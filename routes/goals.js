@@ -21,7 +21,10 @@ router.patch('/:goalId', verifyToken, views.updateGoal);
 
 router.delete('/:goalId', verifyToken, views.deleteGoal);  
 
-router.post('/:goalId/check', verifyToken, views.checkADay);  
+router.post('/:goalId/check', [
+    check('goalDayDate').exists(),
+    check('dayNumber').exists().isNumeric()
+  ], verifyToken, views.checkADay);  
 
 router.post('/:goalId/miss', verifyToken, views.missADay);
 
