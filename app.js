@@ -20,8 +20,8 @@ app.get('/', (request, response) => {
 	})
 })
 
-const authRoutes = require('./routes/auth')
-const goalRoutes = require('./routes/goals')
+const authRoutes = require('./app/auth/routes')
+const goalRoutes = require('./app/goals/routes')
 
 app.use('/auth', authRoutes)
 app.use('/goals', goalRoutes)

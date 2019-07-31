@@ -3,8 +3,8 @@ const router = express.Router()
 
 const { check, validationResult } = require('express-validator')
 
-const verifyToken = require('../verify-token')
-const views = require('../views/auth')
+const verifyToken = require('../../verify-token')
+const views = require('../../app/auth/views')
 
 router.post('/register', [
     check('firstname').exists(),

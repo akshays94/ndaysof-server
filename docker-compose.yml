@@ -12,7 +12,8 @@ services:
         ports:
             - 3000:3000
         depends_on:
-            - mydb   
+            - mydb
+            - mytestdb
         command: npm run dev  
 
 
@@ -22,5 +23,14 @@ services:
             - postgres_data_dev:/var/lib/postgresql/data
         env_file:
             - ./Docker/db.env
+
+    mytestdb:
+        image: postgres:11
+        volumes:
+            - postgres_data_test:/var/lib/postgresql/data
+        env_file:
+            - ./Docker/testdb.env
+                    
 volumes:
-    postgres_data_dev:       
+    postgres_data_dev:
+    postgres_data_test:    

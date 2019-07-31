@@ -3,12 +3,12 @@ const bcrypt  = require('bcrypt');
 
 const { check, validationResult } = require('express-validator');
 
-const pool = require('../db-config.js');
+const pool = require('../../db-config.js');
 
 const SALT_ROUNDS = parseInt(process.env.SALTROUNDS);
 const JWTSECRETKEY = process.env.JWTSECRETKEY;
 
-const verifyToken = require('../verify-token')
+const verifyToken = require('../../verify-token')
 
 module.exports = {
 
