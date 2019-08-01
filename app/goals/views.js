@@ -315,14 +315,22 @@ module.exports = {
       const isCheckDayExists = {
         text: `SELECT EXISTS 
                 (SELECT * from day 
-                where goal=$1 and day_date=$2 and day_no=$3)`,
-        values: [goalId, goalDayDate, dayNumber]  
+                where goal=$1 and day_date=$2 and day_no=$3 and is_checked=$4)`,
+        values: [goalId, goalDayDate, dayNumber, true]  
       }
 
       const getGoalQuery = {
         text: `SELECT days, days_completed, start_date from goal 
                 WHERE id=$1`,
         values: [goalId]
+      }
+
+      const lastDayDateQuery = {
+        text: `SELECT day_date, is_checked FROM day
+              WHERE goal=$1 
+              ORDER BY created_on DESC 
+              LIMIT 1`,
+        values: [goalId]      
       }
 
       const updateGoalInfoQuery = {
@@ -375,11 +383,26 @@ module.exports = {
             return response.status(422).json({ message: `dayNumber invalid. Take action for dayNumber ${daysCompleted + 1}` })
           }
 
-          var expectedCurrentDate 
-            = moment(startDate, "DD-MM-YYYY")
-                .add(dayNumber - 1, 'days')
-                .toDate();
+          return pool.query(lastDayDateQuery)
           
+        })
+        .catch(err => response.status(500).json({ message: `Error getGoalQuery: ${err}` }))
+        // -------------------
+        
+        .then(results => {
+          const row = results.rows[0];
+          let expectedCurrentDate = row.day_date;
+          const isChecked = row.is_checked;
+
+
+          expectedCurrentDate 
+            = moment(expectedCurrentDate, "DD-MM-YYYY")
+                .add(1, 'days')
+                .toDate();
+
+          console.log('isChecked', isChecked)
+          console.log('expectedCurrentDate', expectedCurrentDate)
+
           if ( moment(expectedCurrentDate).format("YYYY-MM-DD") !== moment(goalDayDate).format("YYYY-MM-DD") ) {
             return response.status(422).json({ message: `Expected date: ${moment(expectedCurrentDate).format('DD-MM-YYYY')}` })
           }
@@ -388,8 +411,7 @@ module.exports = {
               pool.query(createNewMissGoalDayQuery)          
           ])  
         })
-        .catch(err => response.status(500).json({ message: `Error getGoalQuery: ${err}` }))
-        // -------------------
+        .catch(err => response.status(500).json({ message: `Error lastDayDateQuery: ${err}` }))
 
         // --- goal day creation & update goals ---
         .then(results => {
