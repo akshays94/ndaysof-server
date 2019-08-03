@@ -20,20 +20,32 @@ router.patch('/:goalId', verifyToken, views.updateGoal);
 
 router.delete('/:goalId', verifyToken, views.deleteGoal);  
 
+// router.post('/:goalId/check', [
+//     check('goalDayDate').exists(),
+//     check('dayNumber').exists().isNumeric()
+//   ], verifyToken, views.checkADay);
+
 router.post('/:goalId/check', [
-    check('goalDayDate').exists(),
     check('dayNumber').exists().isNumeric()
-  ], verifyToken, views.checkADay);
+  ], verifyToken, views.checkADayWithoutDate);
+
+// router.post('/:goalId/miss', [
+//     check('goalDayDate').exists(),
+//     check('dayNumber').exists().isNumeric()
+//   ], verifyToken, views.missADay);
+
+router.post('/:goalId/miss', [
+    check('dayNumber').exists().isNumeric()
+  ], verifyToken, views.missADayWithoutDate);
+
+router.patch('/day/:dayId/content', [
+    check('content').exists()
+  ], verifyToken, views.addContent);
 
 // router.post('/:goalId/undo-check', [
 //     check('goalDayDate').exists(),
 //     check('dayNumber').exists().isNumeric()
 //   ], verifyToken, views.checkADay);
-
-router.post('/:goalId/miss', [
-    check('goalDayDate').exists(),
-    check('dayNumber').exists().isNumeric()
-  ], verifyToken, views.missADay);
 
 // router.post('/:goalId/undo-miss', [
 //     check('goalDayDate').exists(),
