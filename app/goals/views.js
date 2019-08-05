@@ -10,8 +10,8 @@ const JWTSECRETKEY = process.env.JWTSECRETKEY;
 
 const verifyToken = require('../../verify-token')
 
+
 const addExtraParamsInGoalObject = (goal) => {
-  console.log('\n\n\n', goal, goal.days_completed, goal.days)
   return Object.assign(goal, {
       completion_percentage: parseInt( goal.days_completed / goal.days * 100 ),
       current_day_number: goal.days_completed + 1,
@@ -40,15 +40,7 @@ module.exports = {
       pool
         .query(getGoalsQuery)
         .then(results => {
-
-          let rows = results.rows
-            .map(goal => Object.assign(goal, {
-              completion_percentage: parseInt( goal.days_completed / goal.days * 100 ),
-              current_day_number: goal.days_completed + 1,
-              start_date: moment(goal.start_date).format('DD MMMM YYYY'),
-              current_day_date: moment(goal.start_date).add(goal.days_completed, 'days').format('DD MMMM YYYY')
-            }))
-
+          let rows = results.rows.map(addExtraParamsInGoalObject)
           return response.json(rows)
         })
         .catch(err => response.status(500).json({ message: `Error getGoalsQuery: ${err}` }))
@@ -317,22 +309,15 @@ module.exports = {
         // --------------------------
 
         // --- goal day creation & update goals ---
-        .then(results => {          
-          const createdDayQuery = {
-            text: `SELECT * FROM day 
-                    WHERE goal=$1 
-                    ORDER BY created_on DESC 
-                    LIMIT 1`,
-            values: [goalId]
-          }
+        .then(results => {
           pool
-            .query(createdDayQuery)
+            .query(getGoalQuery)
             .then(results => {
-              const row = results.rows[0];
-              console.log('row', row)
+              let row = results.rows[0];
+              row = addExtraParamsInGoalObject(row);
               return response.status(201).json(row)
             })
-            .catch(err => response.status(500).json({ message: `Error createdDayQuery: ${err}` }))
+            .catch(err => response.status(500).json({ message: `Error getGoalQuery: ${err}` }))
         })
         .catch(err => response.status(500).json({ message: `Error createNewGoalDayQuery: ${err}` }))
         // -------------------------
@@ -497,9 +482,14 @@ module.exports = {
 
         // --- goal day creation & update goals ---
         .then(results => {
-          console.log(results)
-          let row = results[1].rows[0];
-          return response.status(201).json(row)
+          pool
+            .query(getGoalQuery)
+            .then(results => {
+              let row = results.rows[0];
+              row = addExtraParamsInGoalObject(row);
+              return response.status(201).json(row)
+            })
+            .catch(err => response.status(500).json({ message: `Error getGoalQuery: ${err}` }))
         })
         .catch(err => response.status(500).json({ message: `Error createNewGoalDayQuery: ${err}` }))
         // -------------------------
